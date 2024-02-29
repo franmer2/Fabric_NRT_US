@@ -1,226 +1,234 @@
-Microsoft Fabric propose une suite d'outils très pratiques pour accélérer la mise en place de project "quasi temps réel"
+Microsoft Fabric offers a suite of handy tools to accelerate the implementation of "near real-time" projects
 
-Dans cet article, nous allons voir un exemple d'implémentation de ces outils pour mettre en place un rapport Power BI "quasi temps réel" à partir des données de ce [site web](https://bctransit.com/open-data). Plus précismenent nous allons utiliser les données se trouvant [ici](https://bct.tmix.se/gtfs-realtime/vehicleupdates.js?operatorIds=12).
+In this article, we'll look at an example of how to implement these tools to set up a "near real-time" Power BI report from the data in this [website](https://bctransit.com/open-data). More precisely, we will use the data found [here](https://bct.tmix.se/gtfs-realtime/vehicleupdates.js?operatorIds=12).
 
-Ci-dessous une vue globale la solution
+Below is an overview of the solution
 
 ![Overview](/Pictures/001.jpg)
 
 
 
-# Prérequis
+# Prerequisites
 
-- Une [capacité Fabric](https://learn.microsoft.com/fr-fr/fabric/enterprise/buy-subscription#buy-an-azure-sku)
-- Une [souscription Azure](https://azure.microsoft.com/en-ca/free/)
-- Un service [Azure Logic Apps déployé](https://learn.microsoft.com/fr-fr/azure/logic-apps/logic-apps-overview#get-started)
+- One [Fabric Capability](https://learn.microsoft.com/fr-fr/fabric/enterprise/buy-subscription#buy-an-azure-sku)
+- One [Azure subscription](https://azure.microsoft.com/en-ca/free/)
+- An [Azure Logic Apps deployed] (https://learn.microsoft.com/fr-fr/azure/logic-apps/logic-apps-overview#get-started)
+
+
 
 
 
 # Microsoft Fabric
-## Base de données KQL
+## KQL Database
 
+In order to store the data we're going to retrieve and create "near real-time" reports, the KQL database is the ideal candidate here.
 
-Afin de stocker les données que nous allons récupérer et créer des rapports "quasi temps réel", la base de données KQL est le candidat idéal ici.
+To get started, sign in to the [Microsoft Fabric](https://fabric.microsoft.com) portal.
 
-Pour commencer, connectez-vous sur le portail [Microsoft Fabric](https://fabric.microsoft.com).
+[Create a new workspace](https://learn.microsoft.com/fr-fr/fabric/get-started/create-workspaces) in order to deploy the various services.
 
-[Créez un nouvel espace de travail](https://learn.microsoft.com/fr-fr/fabric/get-started/create-workspaces) afin d'y déployer les différents services.
-
-Une fois dans votre espace de travail nouvellement créer, choisissez le persona "Real-Time Analytics"
+Once in your newly created workspace, choose the "Real-Time Analytics" persona
 
 ![Persona](/Pictures/002.jpg)
 
-Cliquez sur le bouton "+ New" puis sur "KQL Database"
+Click on the "+ New" button and then on "KQL Database"
 
 ![KQL](/Pictures/003.png)
 
-Donnez un nom à votre base KQL et cliquez sur le bouton "Create"
+Give your KQL database a name and click on the "Create" button
 
 ![Create](/Pictures/004.png)
 
-Une fois votre base KQL créée, vous devriez obtenir une fenêtre similaire à celle-ci dessous :
+Once you've created your KQL, you should get a window similar to the one below:
 
 ![Create](/Pictures/005.png)
 
 ## Eventstream
 
-Depuis votre espace de travail, cliquez sur le bouton "+ New" puis sur "Eventstream".
+From your workspace, click on the "+ New" button and then on "Eventstream".
 
 ![Eventstream](/Pictures/006.png)
 
-Donnez un nom à votre "Eventstream" puis cliquez sur "Create".
+Give your "Eventstream" a name and click "Create".
 
 ![Eventstream](/Pictures/007.png)
 
-### Creation de l'entrée des évènements
 
-Une fenêtre similaire à celle-ci dessous devrait s'ouvrir. Cliquez sur "New source" puis sur "Custom App"
+
+### Creating the Event Entry
+
+A window similar to the one below should open. Click on "New source" and then on "Custom App"
 
 ![Input](/Pictures/008.png)
 
-Sur la droîte, un panneau devrait s'ouvrir. Donnez un nom à la source. Cliquez sur le bouton "Add"
+On the right, a sign should open. Give the source a name. Click on the "Add" button
 
 ![Eventstream](/Pictures/009.png)
 
-Une fois votre entrée créée, cliquez dessus. Dans la partie inférieure centrale de l'écran cliquez sur "Keys".
+Once your entry is created, click on it. In the lower middle part of the screen, click on "Keys".
 
-Notez les valeurs pour les éleéments suivants, nous allons en avoir besoin ultérieurement :
+Note the values for the following items that we'll need later:
 - Event hub name
 - Primary Key
 
 ![Eventstream](/Pictures/010.png)
 
-Avant d'aller plus loin avec Microsoft Fabric Eventstream, nous devons envoyer des données dans le moteur d'ingestion afin d'otenir le schéma de données.
+Before we go any further with Microsoft Fabric Eventstream, we need to send data into the ingestion engine in order to maintain the data schema.
 
-Dans note exemple, nous alons déployer un Azure Logic Apps pour récupérer les données et les envoyer à Microsoft Fabric Eventstream. (il est bien entendu possible d'utiliser d'autres solutions comme les "Azure Functions").
+In our example, we're going to deploy an Azure Logic Apps to retrieve the data and send it to Microsoft Fabric Eventstream. (it is of course possible to use other solutions such as "Azure Functions").
+
 
 # Azure
 # Azure logic apps
 
-Depuis le [portail Azure](https://portal.azure.com), allez dans votre service Azure logic app.
-Dans le panneau de gauche, cliquez sur "Workflows" puis sur le bouton "Add", donnez un nom à votre Workflow et sélectionnez "Statefeul..." puis cliquez sur "Create".
+From the [Azure portal](https://portal.azure.com), go to your Azure logic app service.
+In the left panel, click on "Workflows" and then on the "Add" button, give your workflow a name and select "Statefeul..." then click "Create".
 
 ![LogicApps](/Pictures/015.png)
 
-Une fois votre "workflow" créé, cliquez dessus.
+Once your workflow is created, click on it.
 
 ![LogicApps](/Pictures/016.png)
 
-Cliquez sur "Designer" puis sur "Add a trigger"
+Click on "Designer" and then on "Add a trigger"
 
 ![LogicApps](/Pictures/017.png)
 
-Comme on désire récupérer les données toutes les 30 secondes, on va choisir un déclencheur de type récurrence. 
-Dans la zone de recherche, entrez "recurrence", puis sélectionnez le déclecheur "Schedule / Recurrence".
+Since we want to recover the data every 30 seconds, we will choose a recurrence trigger. 
+In the search box, enter "recurrence" and then select the "Schedule/Recurrence" trigger.
 
 ![LogicApps](/Pictures/019.png)
 
-Définissez les paramètres de votre déclencheur. Ici je demande un déclenchement toutes les 30 secondes.
+Set the parameters for your trigger. Here I'm asking for a trigger every 30 seconds.
 
 ![LogicApps](/Pictures/020.png)
 
-Sous le déclencheur "Recurrence", cliquez sur le signe "+", cherchez avec le mot clef "https" puis choissisez l'action "HTTP"
+Under the "Recurrence" trigger, click on the "+" sign, search with the keyword "https" and then choose the "HTTP" action
 
 ![LogicApps](/Pictures/021.png)
 
-Dans l'onglet "Parameters", entrez les valeurs suivantes pour les champs :
-- **URI** : https://bct.tmix.se/gtfs-realtime/vehicleupdates.js?operatorIds=12
-- **Method** : GET
+In the "Parameters" tab, enter the following values for the fields:
+- **URI**: https://bct.tmix.se/gtfs-realtime/vehicleupdates.js?operatorIds=12
+- **Method**: GET
 
 ![LogicApps](/Pictures/022.png)
 
-
-En dessous de l'action "HTTP", cliquez sur le signe "+", recherchez "Event hub" et sélectionnez "Event Hubs / Sent **E**vent"
+Below the "HTTP" action, click on the "+" sign, search for "Event hub" and select "Event Hubs / Sent **E**vent"
 
 ![LogicApps](/Pictures/023.png)
 
-Si aucune connexion existe, vous devriez avoir la fenêtre suivante :
+If no connection exists, you should have the following window:
 
 ![LogicApps](/Pictures/024.png)
 
-L'information concernant la "Connection string" se retrouve dans l'entrée de votre Microsoft Fabric Eventstream (l'information a été notée plus tôt dans cet article).
-Cliquez sur le bouton "Create New".
+The information about the "Connection string" can be found in the entry of your Microsoft Fabric Eventstream (the information was noted earlier in this article).
+Click on the "Create New" button.
 
-La fenêtre suivante apparaît alors. Renseignez le nom de votre Eventstream dans le champ "Event Hub Name". Dans la liste déroulante "Advanced parameters" sélectionnez "Content".
+The following window will appear. Fill in the name of your Eventstream in the "Event Hub Name" field. From the "Advanced parameters" drop-down list, select "Content".
 
 ![LogicApps](/Pictures/025.png)
 
-Cliquez dans le champ "Content" afin de faire apparaîte la petite bulle bleue. Cliquez sur l'éclair. 
+Click in the "Content" field to make the little blue bubble appear. Click on the lightning bolt. 
 
 ![LogicApps](/Pictures/026.png)
 
-Puis sous l'action "HTTP" sélectionnez "Body".
+Then, under the "HTTP" action, select "Body".
 
 ![LogicApps](/Pictures/027.png)
 
-Vous devriez avoir une fenêtre similaire à celle ci-dessous :
+You should have a window similar to the one below:
 
 ![LogicApps](/Pictures/028.png)
 
-Cliquez sur le bouton "Save"
+Click on the "Save" button
 
 ![LogicApps](/Pictures/029.png)
 
-Afin de vérifier que tout se passe bien, après avoir sauvegarder votre "workflow", cliquez sur "Overview" et vérifier que votre "workflow"se déclenche bien toutes les 30 secondes et qu'une erreur n ést repportée dans la colonne "Status.
+
+In order to check that everything is going well, after saving your workflow, click on "Overview" and check that your "workflow" is triggered every 30 seconds and that no errors have been reported in the "Status" column.
 
 ![LogicApps](/Pictures/030.png)
 
 
-# Microsoft Fabric (suite)
+
+# Microsoft Fabric (continued)
  
-Après avoir créer notre "workflow" Azure Logic Apps, retournez dans Microsoft Fabric, et plus précisement dans votre Eventstream. 
-Cliquez sur sur votre Evenstream afin de vérifier que les évènements arrivent correctement.
+After you've created your Azure Logic Apps workflow, go back to Microsoft Fabric, and more specifically to your Eventstream. 
+Click on your Evenstream to verify that the events are coming correctly.
+
+
 
 ![LogicApps](/Pictures/031.png)
 
+### Creating the Event Destination
 
-### Création de la destination des évènements
-
-Cliquez sur "New destination", puis sur "KQL Database".
+Click on "New destination" and then on "KQL Database".
 
 ![Output](/Pictures/011.png)
 
-Choisissez "Direct ingestion" (Dans le cas où vous souhaiteriez faire des transformations avant l'envoie vers la destination, vous avez la possibilité de choisir l'option "Event processing before ingestion"). 
-Puis renseignez les informations de votre base KQL. Cliquez sur "Add and configure".
+Choose "Direct ingestion" (In case you want to do transformations before sending to the destination, you have the option to choose the "Event processing before ingestion" option). 
+Then fill in the information in your KQL database. Click on "Add and configure".
 
 ![Output](/Pictures/012.png)
 
-Maintenant, nous allons définir vers quelle table envoyer les données. Cliquez sur "New table".
+Now, we're going to define which table to send the data to. Click on "New table".
 
 ![Picture](/Pictures/013.png)
 
-Donnez un nom à votre table puis cliquez sur "Next".
+Give your table a name and then click "Next".
 
 ![Picture](/Pictures/014.png)
 
-
-Dans l'étape "Inspect the data", l'assistant devrait pouvoir retrouver un échantillon des données, Cliquez sur "Finish".
+In the "Inspect the data" step, the wizard should be able to find a sample of the data, click on "Finish".
 
 ![Picture](/Pictures/032.png)
 
-Puis durant l étape "Summary", cliquez sur "Close".
+Then during the "Summary" step, click on "Close".
 
 ![Picture](/Pictures/033.png)
 
-Votre process d'ingestion est maintenant prêt !
+Your ingestion process is now ready!
 
 ![Picture](/Pictures/034.png)
 
+
+
 ## KQL Database
 
-Si tout va bien, votre table à du être créée dans votre base KQL. Ci dessous on peut voir ma table "FranmerBronze". Cliquez sur les 3 petits points à droite de la table afin d'aller chercher la commande "Show any 100 records"
+If all goes well, your table must have been created in your KQL database. Below you can see my "FranmerBronze" table. Click on the 3 small dots to the right of the table to get the command "Show any 100 records"
 
 ![Picture](/Pictures/035.png)
 
-La fenêtre "Explore your data" s'ouvre et vous donne un apreçu des données qui arrivent dans votre table.
+The "Explore your data" window will open and give you an overview of the data that arrives in your table.
 
 ![Picture](/Pictures/036.png)
 
-En l'état, les données mne sont pas facilement exploitable pour la création d'un rapport "quasi temps réel". C'est ici que le langage Kusto entre en scène.
+As it stands, the data is not easily usable for the creation of a "near real-time" report. This is where the Kusto language comes into play.
 
-### Requête Kusto (KQL Queryset)
 
-Grâce au langage Kusto, il est relativement assez simpe de créer un script qui permet de rendre les données plus facilement exploitable. 
-Nous allons utiliser la fonctionnalité "KQL Queryset" afin d'écrire notre requête.
+### Kusto Query (KQL Queryset)
 
-Depuis votre espace de travail, cliquez sur le bouton "New"puis sur le bouton "KQL Queryset".
+Thanks to the Kusto language, it's relatively simple enough to create a script that makes the data more usable. 
+We're going to use the "KQL Queryset" feature to write our query.
+
+From your workspace, click on the "New" button and then on the "KQL Queryset" button.
 
 ![Picture](/Pictures/037.png)
 
-Donnez un nom à votre "Queryset" et cliquez sur "Create".
+Give your "Queryset" a name and click "Create".
 
 ![Picture](/Pictures/038.png)
 
-Sélectionnez votre base KQL et cliquez sur le bouton "Connect".
+Select your KQL database and click on the "Connect" button.
 
 ![Picture](/Pictures/039.png)
 
-Vous devriez avoir une fenêtre similaire à celle ci-dessous :
+You should have a window similar to the one below:
 
 ![Picture](/Pictures/040.png)
 
+Clear the sample scripts in the main window and copy the code below:
 
-Effacez les exemples de script dans la fenêtre principale puis copiez le code ci-dessous :
 
 ```java
 
@@ -297,29 +305,33 @@ FranmerBronze
 
 ```
 
-Vous devriez obtenir quelque chose de similaire à l écran ci-dessous :
+You should get something similar on the screen below:
 ![Picture](/Pictures/041.png)
 
-Ce script va créer une fonction dont le nom sera "FlattenBCTJson".
-Cliquez sur le bouton "Run".
+This script will create a function with the name "FlattenBCTJson".
+Click on the "Run" button.
 
 ![Picture](/Pictures/042.png)
 
-Si tout va bien vous devriez obtenir un résultat similaire à celui ci-dessous :
+If all goes well, you should get a result similar to the one below:
 
 ![Picture](/Pictures/043.png)
 
+
+
 ### Update policy
 
-Nous allons maintenant utiliser la fonctionnalité "Update Policy" afin d'éxécuter la fonction lorsque un évènement arrivera dans la table "FranmerBronze".
-Etant donnée que le but de cette fonction est de rendre les données facilement exploitable pour l'analyse ou la création de rapports, nous allons conserver le résultat de la fonction dans une seconde table que j'appellerai "FranmerGold".
+We will now use the "Update Policy" feature to execute the function when an event arrives in the "FranmerBronze" table.
+Since the purpose of this function is to make the data easily usable for analysis or reporting, we'll keep the result of the function in a second table that I'll call "FranmerGold".
 
-Nous allons donc créer une nouvelle table avec le schéma correspondant à la sortie de fla fonction précédement créée. 
-Cliquez sur le bouton "+" afin de créer une nouvelle page.
+So we're going to create a new table with the schema corresponding to the output of the previously created function. 
+Click on the "+" button to create a new page.
 
 ![Picture](/Pictures/044.png)
 
-copier le code suivant et exécutez le en cliquant sur le bouton "Run" (Dans le cas ou le bouton Run est grisé, changez de fenêtre en restant au sein de Microsoft Fabric en allant dans un autre artefact, puis revenez dans votre Queryset):
+Copy the following code and run it by clicking on the "Run" button (In case the Run button is grayed out, switch windows while staying within Microsoft Fabric by going to another artifact, then go back to your Queryset):
+
+
 
 ```java
 //Create target table with schema only
@@ -329,12 +341,14 @@ copier le code suivant et exécutez le en cliquant sur le bouton "Run" (Dans le 
 
 ![Picture](/Pictures/045.png)
 
-Vous deviez obtenir une seconde table comme illustré ci-dessous :
+You should get a second table as shown below:
 
 ![Picture](/Pictures/046.png)
 
-Maintenant nous sommes prêt pour créer notre "Update Policy".
-Copiez le code ci-dessous dans une nouvelle fenêtre et exécutez le code : 
+Now we are ready to create our "Update Policy".
+Copy the code below into a new window and run the code:
+
+
 
 ```java
 //Create a table policy
@@ -344,38 +358,38 @@ Copiez le code ci-dessous dans une nouvelle fenêtre et exécutez le code :
 
 ![Picture](/Pictures/047.png)
 
-Si tout va bien vous devriez obtenir un résultat similaire :
-
+If all goes well, you should get a similar result:
 
 ![Picture](/Pictures/048.png)
 
-Revenez dans votre base de donnez KQL (Vous pouvez utiliser les "switchs" situés sur la gauche pour changer rapidement d'artefact). Vous devriez voir votre nouvelle table (cliquez sur "Refresh" si ce n ést pas le cas).
-Faites une requêtre sur votre nouvelle table afin de voir les nouvelles données arriver dedans.
+Go back to your KQL database (You can use the "switches" on the left to quickly change artifacts). You should see your new table (click "Refresh" if not).
+Query your new table to see the new data coming in.
 
 ![Picture](/Pictures/049.png)
 
-Maintenant que les données arrivent en quasi temps réel formattée à notre convenance, nous allons créer un rapport Power BI directement à aprtir de cette table.
-Cliquez sur les 3 petits points à droite du nom de votre table et sélectionnez "Build Power BI Report".
+Now that the data arrives in near real-time formatted to our liking, we're going to create a Power BI report directly from this table.
+Click on the 3 small dots to the right of your table name and select "Build Power BI Report".
 
 ![Picture](/Pictures/050.png)
 
-L'éditeur de rapport Power BI s'ouvre dans une autre fenêtre. Vous pouvez maintenant créer un rapport directement à partir des colonnes de la table. Sur la droite, vous y trouverez toutes les colonnes utiles pour contruire votre nouveau rapport.
+The Power BI report editor opens in another window. You can now create a report directly from the columns in the table. On the right, you will find all the useful columns to build your new report.
+
 
 ![Picture](/Pictures/051.png)
 
-Pour que le rapport réagisse en quasi temps réel, **N'OUBLIEZ PAS** de paramétrer le rapport afin qu'il se mette à jour automatiquement suivant la fréquence désirée.
-Cliquez sur un espace **vide** du rapport. Cliquez ensuite sur l'icône "Format" puis activez "Page Refresh". Définissez la période de mise à jour automatique. Ici je choisi 30 secondes.
+To ensure that the report responds in near real-time, **DON'T FORGET** to set the report to automatically update at the desired frequency.
+Click a **blank** space in the report. Then click on the "Format" icon and then turn on "Page Refresh". Set the automatic update period. Here I choose 30 seconds.
 
 ![Picture](/Pictures/052.png)
 
-Il ne vous reste plus qu'a vous construire un beau rapport quasi temps réel !
+All you have to do is build a nice almost real-time report!
 
-# Astuce Kusto
+# Kusto Tip
 
-Mon collègue [Gilles L'herault](https://www.linkedin.com/in/gilleslherault/), beau jeune homme devant l'éternel, m'a suggéré l'astuce suivante permettant de générer un script permetant de reconstruire complètement la base KQL dans un autre environnement. Utilisez simplement la commande suivante:
+My colleague [Gilles L'herault](https://www.linkedin.com/in/gilleslherault/), suggested the following trick to generate a script to completely rebuild the KQL database in another environment. Just use the following command:
 
-```java
+'''Java
 .show database YourKqlDbName schema as csl script
-```
+'''
 
-![Picture](/Pictures/053.png)
+! [Picture] (/Pictures/053.png)
