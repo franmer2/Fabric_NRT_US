@@ -61,7 +61,7 @@ A window similar to the one below should open. Click on "New source" and then on
 
 ![Input](/Pictures/008.png)
 
-On the right, a sign should open. Give the source a name. Click on the "Add" button
+On the right, a pane should open. Give the source a name. Click on the "Add" button
 
 ![Eventstream](/Pictures/009.png)
 
@@ -392,4 +392,4 @@ My colleague [Gilles L'herault](https://www.linkedin.com/in/gilleslherault/), su
 .show database YourKqlDbName schema as csl script
 '''
 
-! [Picture] (/Pictures/053.png)
+![Picture](/Pictures/053.png)
