@@ -1,8 +1,8 @@
-Microsoft Fabric offers a suite of handy tools to accelerate the implementation of "near real-time" projects
+Microsoft Fabric offers a suite of handy tools to accelerate the implementation of "near real-time" projects.
 
 In this article, we'll look at an example of how to implement these tools to set up a "near real-time" Power BI report from the data in this [website](https://bctransit.com/open-data). More precisely, we will use the data found [here](https://bct.tmix.se/gtfs-realtime/vehicleupdates.js?operatorIds=12).
 
-Below is an overview of the solution
+Below is an overview of the solution:
 
 ![Overview](/Pictures/001.jpg)
 
@@ -21,21 +21,21 @@ Below is an overview of the solution
 # Microsoft Fabric
 ## KQL Database
 
-In order to store the data we're going to retrieve and create "near real-time" reports, the KQL database is the ideal candidate here.
+In order to store data, we're going to retrieve and create "near real-time" reports, the KQL database is the ideal candidate here.
 
 To get started, sign in to the [Microsoft Fabric](https://fabric.microsoft.com) portal.
 
 [Create a new workspace](https://learn.microsoft.com/fr-fr/fabric/get-started/create-workspaces) in order to deploy the various services.
 
-Once in your newly created workspace, choose the "Real-Time Analytics" persona
+Once in your newly created workspace, choose the "Real-Time Analytics" persona.
 
 ![Persona](/Pictures/002.jpg)
 
-Click on the "+ New" button and then on "KQL Database"
+Click on the "+ New" button and then on "KQL Database".
 
 ![KQL](/Pictures/003.png)
 
-Give your KQL database a name and click on the "Create" button
+Give your KQL database a name and click on the "Create" button.
 
 ![Create](/Pictures/004.png)
 
@@ -57,11 +57,11 @@ Give your "Eventstream" a name and click "Create".
 
 ### Creating the Event Entry
 
-A window similar to the one below should open. Click on "New source" and then on "Custom App"
+A window similar to the one below should open. Click on "New source" and then on "Custom App".
 
 ![Input](/Pictures/008.png)
 
-On the right, a pane should open. Give the source a name. Click on the "Add" button
+On the right, a pane should open. Give the source a name. Click on the "Add" button.
 
 ![Eventstream](/Pictures/009.png)
 
@@ -90,7 +90,7 @@ Once your workflow is created, click on it.
 
 ![LogicApps](/Pictures/016.png)
 
-Click on "Designer" and then on "Add a trigger"
+Click on "Designer" and then on "Add a trigger".
 
 ![LogicApps](/Pictures/017.png)
 
@@ -103,7 +103,7 @@ Set the parameters for your trigger. Here I'm asking for a trigger every 30 seco
 
 ![LogicApps](/Pictures/020.png)
 
-Under the "Recurrence" trigger, click on the "+" sign, search with the keyword "https" and then choose the "HTTP" action
+Under the "Recurrence" trigger, click on the "+" sign, search with the keyword "https" and then choose the "HTTP" action.
 
 ![LogicApps](/Pictures/021.png)
 
@@ -140,7 +140,7 @@ You should have a window similar to the one below:
 
 ![LogicApps](/Pictures/028.png)
 
-Click on the "Save" button
+Click on the "Save" button.
 
 ![LogicApps](/Pictures/029.png)
 
@@ -195,7 +195,7 @@ Your ingestion process is now ready!
 
 ## KQL Database
 
-If all goes well, your table must have been created in your KQL database. Below you can see my "FranmerBronze" table. Click on the 3 small dots to the right of the table to get the command "Show any 100 records"
+If all goes well, your table must have been created in your KQL database. Below you can see my "FranmerBronze" table. Click on the 3 small dots to the right of the table to get the command "Show any 100 records".
 
 ![Picture](/Pictures/035.png)
 
@@ -324,7 +324,7 @@ If all goes well, you should get a result similar to the one below:
 We will now use the "Update Policy" feature to execute the function when an event arrives in the "FranmerBronze" table.
 Since the purpose of this function is to make the data easily usable for analysis or reporting, we'll keep the result of the function in a second table that I'll call "FranmerGold".
 
-So we're going to create a new table with the schema corresponding to the output of the previously created function. 
+So, we're going to create a new table with the schema corresponding to the output of the previously created function. 
 Click on the "+" button to create a new page.
 
 ![Picture](/Pictures/044.png)
